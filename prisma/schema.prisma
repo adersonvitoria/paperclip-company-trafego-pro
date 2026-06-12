@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Configurações chave-valor do console (chaves de API, metas, guardrails)
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// Estado por agente (liga/desliga, modelo)
+model AgentConfig {
+  slug      String   @id
+  enabled   Boolean  @default(true)
+  model     String   @default("claude-opus-4-8")
+  updatedAt DateTime @updatedAt
+}
+
+// Execuções de pipeline; steps é um JSON serializado [{skill, agent, output, at}]
+model PipelineRun {
+  id        String   @id @default(cuid())
+  pipeline  String
+  briefing  String
+  status    String   @default("RUNNING") // RUNNING | DONE | ERROR
+  steps     String   @default("[]")
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
