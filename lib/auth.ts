@@ -17,9 +17,10 @@ export function authConfigured(): boolean {
 }
 
 export function checkPassword(password: string): boolean {
-  const admin = process.env.ADMIN_PASSWORD;
+  // trim defende contra newline/CR acidental gravado junto com a env var
+  const admin = process.env.ADMIN_PASSWORD?.trim();
   if (!admin || !password) return false;
-  const a = Buffer.from(password);
+  const a = Buffer.from(password.trim());
   const b = Buffer.from(admin);
   // comprimentos diferentes: compara contra si mesmo para manter tempo constante
   if (a.length !== b.length) {
