@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { gerarContrato, assinarDigital } from '@/lib/contrato';
-import { gerarPixCopiaECola } from '@/lib/pix';
+import { gerarPixCopiaECola, gerarPixQrSvg } from '@/lib/pix';
 import { reaisToCents } from '@/lib/finance';
 
 export type FechamentoResult = {
@@ -14,9 +14,17 @@ export type FechamentoResult = {
   contrato?: string;
   assinatura?: string;
   pix?: string;
+  pixQrSvg?: string;
+  pixDemo?: boolean;
+  numeroContrato?: string;
+  empresaNome?: string;
+  empresaCidade?: string;
+  dataExtenso?: string;
   feeMensalCents?: number;
   setupCents?: number;
 };
+
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
 export async function fecharNegocio(input: {
   nome: string;
@@ -43,13 +51,23 @@ export async function fecharNegocio(input: {
   const empresaCidade = get('empresa_cidade') || 'Brasil';
   const pixKey = get('pix_key');
 
-  const dataISO = new Date().toISOString();
+  const now = new Date();
+  const dataISO = now.toISOString();
+  const dataExtenso = `${empresaCidade}, ${now.getDate()} de ${MESES[now.getMonth()]} de ${now.getFullYear()}`;
+  const numeroContrato = `TP-${now.getFullYear()}-${String(now.getTime()).slice(-6)}`;
+
   const contrato = gerarContrato({ empresaNome, empresaCidade, clienteNome: nome, clienteContato: contato, segmento, feeMensalCents, setupCents, dataISO });
   const assinatura = assinarDigital(contrato, `${nome}|${contato}`, dataISO);
 
+  // PIX: usa a chave configurada (escaneável de verdade) ou cai numa chave de
+  // demonstração só para a tela de teste renderizar o QR. pixDemo sinaliza isso.
+  const pixDemo = !pixKey;
+  const chave = pixKey || 'demo@trafegopro.com.br';
   let pix = '';
-  if (pixKey && setupCents > 0) {
-    pix = gerarPixCopiaECola({ chave: pixKey, nome: empresaNome, cidade: empresaCidade, valorCents: setupCents, txid: 'SETUP' + Date.now().toString().slice(-8) });
+  let pixQrSvg = '';
+  if (setupCents > 0) {
+    pix = gerarPixCopiaECola({ chave, nome: empresaNome, cidade: empresaCidade, valorCents: setupCents, txid: numeroContrato.replace(/[^A-Za-z0-9]/g, '').slice(0, 25) });
+    pixQrSvg = await gerarPixQrSvg(pix);
   }
 
   const client = await prisma.client.create({
@@ -62,5 +80,8 @@ export async function fecharNegocio(input: {
   });
 
   revalidatePath('/clientes');
-  return { ok: true, clientId: client.id, contrato, assinatura, pix, feeMensalCents, setupCents };
+  return {
+    ok: true, clientId: client.id, contrato, assinatura, pix, pixQrSvg, pixDemo,
+    numeroContrato, empresaNome, empresaCidade, dataExtenso, feeMensalCents, setupCents,
+  };
 }

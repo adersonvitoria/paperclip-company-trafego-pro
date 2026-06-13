@@ -1,4 +1,5 @@
 import 'server-only';
+import QRCode from 'qrcode';
 
 // Gerador de PIX "copia e cola" estático (BR Code EMV) com CRC16-CCITT.
 // Docs: padrão EMV® QRCPS / Banco Central (Pix).
@@ -53,4 +54,15 @@ export function gerarPixCopiaECola(opts: {
 
   payload += '6304';
   return payload + crc16(payload);
+}
+
+// Gera o QR Code do PIX como SVG (string) — localmente, sem chamar serviço externo.
+export async function gerarPixQrSvg(payload: string): Promise<string> {
+  return QRCode.toString(payload, {
+    type: 'svg',
+    margin: 1,
+    width: 220,
+    errorCorrectionLevel: 'M',
+    color: { dark: '#075e54', light: '#ffffff' },
+  });
 }
