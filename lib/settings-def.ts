@@ -49,6 +49,8 @@ export const SETTING_SECTIONS: SettingSection[] = [
     description: 'Contexto que os agentes usam em todos os pipelines.',
     fields: [
       { key: 'empresa_nome', label: 'Nome do negócio / cliente' },
+      { key: 'pix_key', label: 'Chave PIX (recebimento do setup)', placeholder: 'CPF/CNPJ, e-mail ou telefone', help: 'Usada pelo robô de vendas para gerar o PIX do setup.' },
+      { key: 'empresa_cidade', label: 'Cidade (PIX/contrato)', placeholder: 'Porto Alegre' },
       { key: 'empresa_nicho', label: 'Nicho / produto principal' },
       { key: 'verba_mensal', label: 'Verba mensal de mídia (R$)', placeholder: '3000' },
       { key: 'cpa_alvo', label: 'CPA alvo (R$)', placeholder: '50' },
