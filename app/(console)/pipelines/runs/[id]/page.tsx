@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { requireSession } from '@/lib/auth';
 import { agentBySlug, pipelineBySlug } from '@/lib/manifest';
 import { advanceRun, type StepResult } from '@/lib/run-engine';
+import { ExecuteStepButton } from './submit-button';
 
 export const dynamic = 'force-dynamic';
 // Cada etapa é uma chamada longa ao modelo — dar folga ao limite da função
@@ -88,10 +89,7 @@ export default async function RunPage({ params }: { params: { id: string } }) {
       {!done && (
         <form action={advanceAction}>
           <input type="hidden" name="runId" value={run.id} />
-          <button type="submit" className="btn">
-            Executar etapa {nextIndex + 1}: {pipeline.steps[nextIndex]?.label}
-          </button>
-          <p className="mt-2 text-xs text-muted">A etapa roda na API da Anthropic e pode levar de 30s a alguns minutos. A página recarrega ao terminar.</p>
+          <ExecuteStepButton label={`Executar etapa ${nextIndex + 1}: ${pipeline.steps[nextIndex]?.label}`} />
         </form>
       )}
     </div>

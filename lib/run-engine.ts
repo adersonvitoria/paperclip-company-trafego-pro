@@ -130,19 +130,25 @@ export async function advanceRun(runId: string): Promise<{ status: string; stepI
   ].join('\n');
 
   const client = new Anthropic({ apiKey });
-  const response = await client.messages.create({
+  // Streaming evita timeout HTTP no lado da Anthropic; 16k dá espaço para raciocínio + entregável
+  const stream = client.messages.stream({
     model,
-    max_tokens: 8000,
+    max_tokens: 16000,
     thinking: { type: 'adaptive' },
     system,
     messages: [{ role: 'user', content: user }],
   });
+  const response = await stream.finalMessage();
 
   let output = '';
   for (const block of response.content) {
     if (block.type === 'text') output += block.text;
   }
-  if (!output.trim()) output = '(o modelo não retornou texto)';
+  if (!output.trim()) {
+    throw new Error(
+      `O modelo não retornou texto (stop_reason: ${response.stop_reason}). Tente executar a etapa novamente; se persistir, troque o modelo do agente "${agent.title}" em Agentes.`,
+    );
+  }
 
   steps.push({ skill: stepDef.skill, agent: stepDef.agent, output, at: new Date().toISOString() });
   const done = steps.length >= pipeline.steps.length;
