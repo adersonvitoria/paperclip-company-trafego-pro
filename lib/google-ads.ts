@@ -4,7 +4,7 @@ import { prisma } from './db';
 // Cliente mínimo da Google Ads API (REST, v23) usando as credenciais salvas em Configurações.
 // Docs: https://developers.google.com/google-ads/api/rest/overview
 
-const API_VERSION = 'v23';
+export const API_VERSION = 'v23';
 
 export type GoogleAdsConfig = {
   customerId: string;       // conta filha (onde as campanhas rodam)
@@ -66,7 +66,7 @@ export async function getGoogleAdsConfig(): Promise<GoogleAdsConfig | null> {
   return cfg;
 }
 
-async function getAccessToken(cfg: GoogleAdsConfig): Promise<string> {
+export async function getAccessToken(cfg: GoogleAdsConfig): Promise<string> {
   const body = new URLSearchParams({
     client_id: cfg.clientId,
     client_secret: cfg.clientSecret,

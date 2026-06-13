@@ -7,6 +7,16 @@ import { agentBySlug, pipelineBySlug } from '@/lib/manifest';
 import { advanceRun, type StepResult } from '@/lib/run-engine';
 import { ExecuteStepButton } from './submit-button';
 import { AutoRunner } from './auto-runner';
+import { PublishPanel } from './publish-panel';
+
+// Gate de auditoria: a etapa account-audit deu PASS/APROVADO?
+function isGatePassed(steps: StepResult[]): boolean {
+  const audit = steps.find((s) => s.skill === 'account-audit');
+  if (!audit) return false;
+  const m = audit.output.match(/VEREDITO[:\s*]*\**\s*(PASS|FAIL|APROVAD[OA]|REPROVAD[OA])/i);
+  const v = (m?.[1] ?? '').toUpperCase();
+  return v === 'PASS' || v.startsWith('APROVAD');
+}
 
 export const dynamic = 'force-dynamic';
 // Cada etapa é uma chamada longa ao modelo — dar folga ao limite da função
@@ -106,6 +116,10 @@ export default async function RunPage({ params }: { params: { id: string } }) {
             </details>
           )}
         </div>
+      )}
+
+      {done && run.pipeline === 'lancamento-campanha' && (
+        <PublishPanel runId={run.id} gatePassed={isGatePassed(steps)} />
       )}
     </div>
   );
