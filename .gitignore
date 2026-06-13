@@ -7,3 +7,4 @@ next-env.d.ts
 
 .env*.local
 admin-password.local.txt
+poll2.cjs
