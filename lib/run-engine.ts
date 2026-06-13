@@ -130,14 +130,18 @@ export async function advanceRun(runId: string): Promise<{ status: string; stepI
   ].join('\n');
 
   const client = new Anthropic({ apiKey });
-  // Streaming evita timeout HTTP no lado da Anthropic; 16k dá espaço para raciocínio + entregável
-  const stream = client.messages.stream({
+  // Streaming evita timeout HTTP no lado da Anthropic. max_tokens alto (32k) e
+  // effort medium para o adaptive thinking não consumir o orçamento inteiro e
+  // deixar o entregável vazio (stop_reason max_tokens) — bug visto com 16k.
+  const params: Record<string, unknown> = {
     model,
-    max_tokens: 16000,
+    max_tokens: 32000,
     thinking: { type: 'adaptive' },
+    output_config: { effort: 'medium' },
     system,
     messages: [{ role: 'user', content: user }],
-  });
+  };
+  const stream = client.messages.stream(params as Parameters<typeof client.messages.stream>[0]);
   const response = await stream.finalMessage();
 
   let output = '';
