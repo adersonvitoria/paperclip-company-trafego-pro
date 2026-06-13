@@ -125,6 +125,33 @@ export function Sparkbars({ data, color = '#34d399' }: { data: Array<{ day: stri
   );
 }
 
+// Fluxo de caixa: barras agrupadas (receber x pagar) por mês + linha de saldo
+export function CashflowBars({ data }: { data: Array<{ label: string; receber: number; pagar: number; saldo: number }> }) {
+  const max = Math.max(1, ...data.flatMap((d) => [d.receber, d.pagar]));
+  const fmt = (c: number) => 'R$ ' + Math.round(c / 100).toLocaleString('pt-BR');
+  return (
+    <div>
+      <div className="flex items-end gap-4" style={{ height: 150 }}>
+        {data.map((d, i) => (
+          <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1.5" title={`Receber ${fmt(d.receber)} · Pagar ${fmt(d.pagar)} · Saldo ${fmt(d.saldo)}`}>
+            <div className="flex w-full items-end justify-center gap-1" style={{ height: 120 }}>
+              <div className="col-grow w-1/2 rounded-t" style={{ height: `${(d.receber / max) * 116}px`, background: 'linear-gradient(180deg,#34d399,#34d39955)', boxShadow: '0 0 8px -1px #34d399', minHeight: d.receber > 0 ? 3 : 0, animationDelay: `${i * 0.05}s` }} />
+              <div className="col-grow w-1/2 rounded-t" style={{ height: `${(d.pagar / max) * 116}px`, background: 'linear-gradient(180deg,#f87171,#f8717155)', boxShadow: '0 0 8px -1px #f87171', minHeight: d.pagar > 0 ? 3 : 0, animationDelay: `${i * 0.05 + 0.03}s` }} />
+            </div>
+            <span className="font-mono-data text-[10px] uppercase text-slate-400">{d.label}</span>
+            <span className="font-mono-data text-[10px]" style={{ color: d.saldo >= 0 ? '#34d399' : '#f87171' }}>{d.saldo >= 0 ? '+' : ''}{Math.round(d.saldo / 100).toLocaleString('pt-BR')}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-4 text-xs text-muted">
+        <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: '#34d399' }} /> A receber</span>
+        <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: '#f87171' }} /> A pagar</span>
+        <span className="ml-auto">saldo por mês abaixo das barras</span>
+      </div>
+    </div>
+  );
+}
+
 export function Gauge({ pct, color = '#22d3ee' }: { pct: number; color?: string }) {
   return (
     <div className="h-2.5 w-full overflow-hidden rounded-full bg-panel2">

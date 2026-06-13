@@ -16,6 +16,7 @@ const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: '▦' },
   { href: '/pipelines', label: 'Pipelines', icon: '⛓' },
   { href: '/orcamento', label: 'Orçamento', icon: '₿' },
+  { href: '/financeiro', label: 'Faturamento', icon: '$' },
   { href: '/conta', label: 'Conta Google Ads', icon: '◎' },
   { href: '/agentes', label: 'Agentes', icon: '⬡' },
   { href: '/configuracoes', label: 'Configurações', icon: '⚙' },
