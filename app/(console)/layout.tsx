@@ -13,6 +13,7 @@ async function logoutAction() {
 const NAV = [
   { href: '/', label: 'Visão Geral' },
   { href: '/pipelines', label: 'Pipelines' },
+  { href: '/conta', label: 'Conta Google Ads' },
   { href: '/agentes', label: 'Agentes' },
   { href: '/configuracoes', label: 'Configurações' },
 ];

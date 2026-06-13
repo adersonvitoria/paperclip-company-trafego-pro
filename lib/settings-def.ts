@@ -27,7 +27,8 @@ export const SETTING_SECTIONS: SettingSection[] = [
     title: 'Google Ads API',
     description: 'Credenciais para integração futura com a conta Google Ads (leitura de métricas e publicação). Os pipelines geram blueprints mesmo sem isso.',
     fields: [
-      { key: 'gads_customer_id', label: 'Customer ID', placeholder: '123-456-7890' },
+      { key: 'gads_customer_id', label: 'Customer ID', placeholder: '123-456-7890', help: 'A conta onde as campanhas rodam (conta filha).' },
+      { key: 'gads_login_customer_id', label: 'Login Customer ID (MCC)', placeholder: '605-725-2874', help: 'A conta administradora dona do Developer Token. Obrigatório quando o acesso é via MCC.' },
       { key: 'gads_developer_token', label: 'Developer Token', secret: true },
       { key: 'gads_client_id', label: 'OAuth Client ID' },
       { key: 'gads_client_secret', label: 'OAuth Client Secret', secret: true },

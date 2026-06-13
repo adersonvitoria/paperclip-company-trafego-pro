@@ -4,6 +4,16 @@ import path from 'path';
 import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from './db';
 import { agentBySlug, pipelineBySlug, COMPANY_NAME } from './manifest';
+import { fetchAccountSnapshot, getGoogleAdsConfig, snapshotToMarkdown } from './google-ads';
+
+// Skills cujo trabalho depende de dados da conta — recebem métricas reais quando a API está configurada
+const DATA_DRIVEN_SKILLS = new Set([
+  'performance-report',
+  'optimization-routine',
+  'budget-pacing',
+  'account-audit',
+  'gads-scripts',
+]);
 
 const MAX_DOC_CHARS = 24_000;
 const MAX_PREV_OUTPUT_CHARS = 7_000;
@@ -95,9 +105,25 @@ export async function advanceRun(runId: string): Promise<{ status: string; stepI
     .map((s, i) => `\n=== OUTPUT DA ETAPA ${i + 1} (${s.skill} por ${s.agent}) ===\n${s.output.slice(0, MAX_PREV_OUTPUT_CHARS)}`)
     .join('\n');
 
+  // Etapas orientadas a dados recebem o snapshot real da conta (ou a razão da indisponibilidade)
+  let metricas = '';
+  if (DATA_DRIVEN_SKILLS.has(stepDef.skill)) {
+    if (await getGoogleAdsConfig()) {
+      try {
+        const snapshot = await fetchAccountSnapshot(30);
+        metricas = `\nMÉTRICAS REAIS DA CONTA (Google Ads API — use estes números, não invente outros):\n${snapshotToMarkdown(snapshot)}`;
+      } catch (e) {
+        metricas = `\nMÉTRICAS REAIS INDISPONÍVEIS: a Google Ads API retornou erro — "${e instanceof Error ? e.message : String(e)}". Declare essa lacuna no entregável e trabalhe apenas com o que o briefing fornece.`;
+      }
+    } else {
+      metricas = '\nMÉTRICAS REAIS INDISPONÍVEIS: credenciais do Google Ads não configuradas. Declare essa lacuna no entregável.';
+    }
+  }
+
   const user = [
     `BRIEFING DO USUÁRIO:\n${run.briefing}`,
     `\nCONTEXTO DO NEGÓCIO (Configurações):\n${contexto}`,
+    metricas,
     previous ? `\nOUTPUTS DAS ETAPAS ANTERIORES:${previous}` : '',
     `\nExecute agora a etapa "${stepDef.label}" e entregue o resultado completo.`,
     stepDef.gate ? `\nEsta etapa é um GATE DE QUALIDADE: termine com um veredito explícito "VEREDITO: PASS" ou "VEREDITO: FAIL" seguido da lista de bloqueios.` : '',
