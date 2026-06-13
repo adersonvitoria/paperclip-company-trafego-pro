@@ -122,10 +122,13 @@ export async function gerarOrcamento(input: OrcamentoInput): Promise<Orcamento> 
     messages: [{ role: 'user', content: `${ctx}\n\nGere a proposta (JSON).` }],
     output_config: { format: { type: 'json_schema', schema: SCHEMA } },
   };
-  const resp = await client.messages.create(params as unknown as Parameters<typeof client.messages.create>[0]);
+  // Streaming: mantém a conexão viva durante a geração e evita o drop de
+  // conexão (visto como "Failed to fetch") em chamadas longas do LLM.
+  const stream = client.messages.stream(params as unknown as Parameters<typeof client.messages.stream>[0]);
+  const resp = await stream.finalMessage();
 
   let text = '';
-  for (const block of (resp as any).content) if (block.type === 'text') text += block.text;
+  for (const block of resp.content) if (block.type === 'text') text += block.text;
   try {
     return JSON.parse(text) as Orcamento;
   } catch {

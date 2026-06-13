@@ -56,10 +56,11 @@ export async function analyzeMetrics(m: DashboardMetrics): Promise<AIAnalysis> {
     messages: [{ role: 'user', content: `Snapshot de métricas:\n\n${metricsToText(m)}\n\nProduza a análise (JSON).` }],
     output_config: { format: { type: 'json_schema', schema: SCHEMA } },
   };
-  const resp = await client.messages.create(params as unknown as Parameters<typeof client.messages.create>[0]);
+  const stream = client.messages.stream(params as unknown as Parameters<typeof client.messages.stream>[0]);
+  const resp = await stream.finalMessage();
 
   let text = '';
-  for (const block of (resp as any).content) if (block.type === 'text') text += block.text;
+  for (const block of resp.content) if (block.type === 'text') text += block.text;
   try {
     return JSON.parse(text) as AIAnalysis;
   } catch {

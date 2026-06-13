@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth';
 import { gerarOrcamento, type OrcamentoInput } from '@/lib/orcamento';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   if (!(await getSession())) {
