@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createEntry } from '../financeiro/actions';
 
 type Cenario = {
   nome: string;
@@ -26,7 +27,9 @@ export function OrcamentoForm() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [o, setO] = useState<Orcamento | null>(null);
+  const [lancado, setLancado] = useState(false);
   const [form, setForm] = useState({ segmento: '', objetivo: '', verbaMidiaMensal: '', ticketMedio: '', regiao: '', modeloCobranca: 'sugerir' });
+  const hoje = new Date().toISOString().slice(0, 10);
 
   function upd(k: string, v: string) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -110,6 +113,25 @@ export function OrcamentoForm() {
               <p className="mt-3 text-sm text-slate-300">Setup inicial sugerido: <span className="font-mono-data text-white">{brl(o.precoServico.setupInicial)}</span></p>
             )}
             <p className="mt-3 text-sm text-muted">{o.precoServico.justificativa}</p>
+
+            {/* Integração Orçamento → Financeiro */}
+            <div className="mt-4 border-t border-line pt-4">
+              {lancado ? (
+                <p className="text-sm text-accent2">✓ Lançado em Faturamento como conta a receber recorrente (12 meses). <a href="/financeiro" className="underline">Ver no Financeiro →</a></p>
+              ) : (
+                <form action={async (fd) => { await createEntry(fd); setLancado(true); }} className="flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="tipo" value="RECEBER" />
+                  <input type="hidden" name="descricao" value={`Gestão de tráfego — ${form.segmento || 'cliente'}`} />
+                  <input type="hidden" name="categoria" value="Serviços" />
+                  <input type="hidden" name="valor" value={o.precoServico.recomendadoMensal.toFixed(2)} />
+                  <input type="hidden" name="vencimento" value={hoje} />
+                  <input type="hidden" name="modo" value="recorrente" />
+                  <input type="hidden" name="meses" value="12" />
+                  <button type="submit" className="btn-ghost text-sm">↳ Lançar fee no Financeiro (a receber, recorrente 12 meses)</button>
+                  <span className="text-xs text-muted">cria 12 mensalidades de {brl(o.precoServico.recomendadoMensal)} em Contas a Receber</span>
+                </form>
+              )}
+            </div>
           </section>
 
           {/* Projeção de retorno */}
