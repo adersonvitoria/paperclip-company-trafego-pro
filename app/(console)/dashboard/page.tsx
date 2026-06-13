@@ -21,10 +21,10 @@ export default async function DashboardPage() {
 
       {/* KPIs principais */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Execuções de pipeline" value={String(m.runs.total)} sub={`${m.runs.done} concluídas · ${m.runs.running} ativas · ${m.runs.error} com erro`} accent="#4f8cff" />
-        <StatCard label="Taxa de conclusão" value={pct(m.runs.completionRate)} sub={`${m.runs.stepsTotal} etapas geradas`} accent="#34d399" />
-        <StatCard label="Agentes ativos" value={`${m.agents.active}/${m.agents.total}`} sub={`${m.catalog.setores} setores · ${m.catalog.skills} skills`} accent="#fbbf24" />
-        <StatCard label="Configuração" value={pct(m.config.pct)} sub={`${m.config.filled}/${m.config.total} campos preenchidos`} accent="#a78bfa" />
+        <div className="reveal reveal-1"><StatCard label="Execuções de pipeline" count={{ to: m.runs.total }} sub={`${m.runs.done} concluídas · ${m.runs.running} ativas · ${m.runs.error} com erro`} accent="#22d3ee" /></div>
+        <div className="reveal reveal-2"><StatCard label="Taxa de conclusão" count={{ to: m.runs.completionRate * 100, suffix: '%' }} sub={`${m.runs.stepsTotal} etapas geradas`} accent="#34d399" /></div>
+        <div className="reveal reveal-3"><StatCard label="Agentes ativos" value={`${m.agents.active}/${m.agents.total}`} sub={`${m.catalog.setores} setores · ${m.catalog.skills} skills`} accent="#fbbf24" /></div>
+        <div className="reveal reveal-4"><StatCard label="Configuração" count={{ to: m.config.pct * 100, suffix: '%' }} sub={`${m.config.filled}/${m.config.total} campos preenchidos`} accent="#a78bfa" /></div>
       </section>
 
       {/* Operação */}
@@ -79,10 +79,10 @@ export default async function DashboardPage() {
           <>
             <p className="text-sm text-muted mb-4">Conta {m.ads.snapshot.customerId}</p>
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              <StatCard label="Custo" value={brl(m.ads.snapshot.totals.costBRL)} />
-              <StatCard label="Cliques" value={String(m.ads.snapshot.totals.clicks)} sub={`CTR ${pct(m.ads.snapshot.totals.ctr)}`} />
-              <StatCard label="CPC" value={brl(m.ads.snapshot.totals.cpcBRL)} />
-              <StatCard label="Conversões" value={String(m.ads.snapshot.totals.conversions)} />
+              <StatCard label="Custo" count={{ to: m.ads.snapshot.totals.costBRL, prefix: 'R$ ', decimals: 2 }} />
+              <StatCard label="Cliques" count={{ to: m.ads.snapshot.totals.clicks }} sub={`CTR ${pct(m.ads.snapshot.totals.ctr)}`} />
+              <StatCard label="CPC" count={{ to: m.ads.snapshot.totals.cpcBRL, prefix: 'R$ ', decimals: 2 }} />
+              <StatCard label="Conversões" count={{ to: m.ads.snapshot.totals.conversions }} />
               <StatCard label="CPA" value={m.ads.snapshot.totals.cpaBRL !== null ? brl(m.ads.snapshot.totals.cpaBRL) : '—'} />
               <StatCard label="ROAS" value={m.ads.snapshot.totals.roas !== null ? m.ads.snapshot.totals.roas.toFixed(2) : '—'} />
             </div>

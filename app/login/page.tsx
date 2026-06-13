@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { authConfigured, checkPassword, createSession, getSession } from '@/lib/auth';
+import { MatrixRain } from '@/components/matrix-rain';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,13 +19,17 @@ export default async function LoginPage({ searchParams }: { searchParams: { erro
   const configured = authConfigured();
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="card w-full max-w-sm">
+    <main className="relative flex min-h-screen items-center justify-center px-4">
+      <MatrixRain opacity={0.16} />
+      <div className="card reveal relative z-10 w-full max-w-sm">
         <div className="mb-6 text-center">
-          <div className="text-2xl font-extrabold">
-            Tráfego<span className="text-accent">PRO</span>
+          <p className="mb-3 flex items-center justify-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.25em] text-muted">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent2 live-dot" /> secure access
+          </p>
+          <div className="text-3xl font-extrabold font-display">
+            Tráfego<span className="text-accent glow-text">PRO</span>
           </div>
-          <p className="mt-1 text-sm text-muted">Console da agência autônoma de Tráfego Pago &amp; Google Ads</p>
+          <p className="mt-1 text-sm text-muted">Command center — Tráfego Pago &amp; Google Ads por agentes de IA</p>
         </div>
 
         {!configured ? (
