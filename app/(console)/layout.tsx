@@ -56,7 +56,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
         </form>
       </aside>
 
-      <main className="relative z-10 max-w-6xl flex-1 px-4 py-6 md:px-8">{children}</main>
+      <main className="relative z-10 w-full flex-1 px-4 py-6 md:px-8 lg:px-10">{children}</main>
     </div>
   );
 }
