@@ -22,6 +22,23 @@ model AgentConfig {
   updatedAt DateTime @updatedAt
 }
 
+// Leads capturados pelo site comercial (formulário público)
+model Lead {
+  id           String   @id @default(cuid())
+  nome         String
+  contato      String   // whatsapp ou e-mail
+  segmento     String
+  objetivo     String
+  verbaMidia   String?
+  status       String   @default("NOVO") // NOVO | CONTATADO | GANHO | PERDIDO
+  orcamentoJson String? // proposta gerada automaticamente pela IA (JSON)
+  origem       String   @default("site")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+}
+
 // Lançamentos financeiros — contas a pagar e a receber (valores em centavos)
 model FinanceEntry {
   id            String   @id @default(cuid())
