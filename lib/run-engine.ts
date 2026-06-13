@@ -130,13 +130,16 @@ export async function advanceRun(runId: string): Promise<{ status: string; stepI
   ].join('\n');
 
   const client = new Anthropic({ apiKey });
-  // Streaming evita timeout HTTP no lado da Anthropic. max_tokens alto (32k) e
-  // effort medium para o adaptive thinking não consumir o orçamento inteiro e
-  // deixar o entregável vazio (stop_reason max_tokens) — bug visto com 16k.
+  // Streaming evita timeout HTTP no lado da Anthropic. THINKING DESLIGADO de
+  // propósito: o framework já está nos docs da skill, então raciocínio extenso
+  // não agrega e, pior, o adaptive thinking consumia o orçamento inteiro e
+  // deixava o entregável vazio (stop_reason max_tokens) — visto com 16k E 32k,
+  // porque o contexto cresce a cada etapa. Sem thinking, os 32k vão todos para
+  // o entregável; o modelo encerra em end_turn por volta de 8-12k.
   const params: Record<string, unknown> = {
     model,
     max_tokens: 32000,
-    thinking: { type: 'adaptive' },
+    thinking: { type: 'disabled' },
     output_config: { effort: 'medium' },
     system,
     messages: [{ role: 'user', content: user }],
