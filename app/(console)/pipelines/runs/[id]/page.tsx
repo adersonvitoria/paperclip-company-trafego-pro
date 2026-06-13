@@ -6,6 +6,7 @@ import { requireSession } from '@/lib/auth';
 import { agentBySlug, pipelineBySlug } from '@/lib/manifest';
 import { advanceRun, type StepResult } from '@/lib/run-engine';
 import { ExecuteStepButton } from './submit-button';
+import { AutoRunner } from './auto-runner';
 
 export const dynamic = 'force-dynamic';
 // Cada etapa é uma chamada longa ao modelo — dar folga ao limite da função
@@ -87,10 +88,24 @@ export default async function RunPage({ params }: { params: { id: string } }) {
       </ol>
 
       {!done && (
-        <form action={advanceAction}>
-          <input type="hidden" name="runId" value={run.id} />
-          <ExecuteStepButton label={`Executar etapa ${nextIndex + 1}: ${pipeline.steps[nextIndex]?.label}`} />
-        </form>
+        <div className="space-y-5">
+          <AutoRunner
+            runId={run.id}
+            active={run.auto}
+            nextLabel={pipeline.steps[nextIndex]?.label ?? ''}
+            totalSteps={pipeline.steps.length}
+            doneSteps={steps.length}
+          />
+          {!run.auto && (
+            <details>
+              <summary className="cursor-pointer text-sm text-muted hover:text-accent">ou executar uma etapa por vez (manual)</summary>
+              <form action={advanceAction} className="mt-3">
+                <input type="hidden" name="runId" value={run.id} />
+                <ExecuteStepButton label={`Executar etapa ${nextIndex + 1}: ${pipeline.steps[nextIndex]?.label}`} />
+              </form>
+            </details>
+          )}
+        </div>
       )}
     </div>
   );

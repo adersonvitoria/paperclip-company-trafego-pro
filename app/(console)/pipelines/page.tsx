@@ -17,8 +17,9 @@ async function startRunAction(formData: FormData) {
   const hasKey = await prisma.setting.findUnique({ where: { key: 'anthropic_api_key' } });
   if (!hasKey?.value) redirect('/pipelines?erro=chave');
 
+  const auto = formData.get('auto') === 'on';
   const run = await prisma.pipelineRun.create({
-    data: { pipeline, briefing },
+    data: { pipeline, briefing, auto },
   });
   redirect(`/pipelines/runs/${run.id}`);
 }
@@ -72,6 +73,10 @@ export default async function PipelinesPage({ searchParams }: { searchParams: { 
                   placeholder="Ex.: Quero lançar tráfego pago para minha clínica de estética em Vitória/ES, verba R$ 3.000/mês, objetivo: agendamentos."
                 />
               </div>
+              <label className="flex items-center gap-2 text-sm text-slate-300">
+                <input type="checkbox" name="auto" defaultChecked className="h-4 w-4 accent-[#4f8cff]" />
+                Rodar todas as etapas automaticamente em sequência
+              </label>
               <button type="submit" className="btn">Iniciar execução</button>
             </form>
           </details>

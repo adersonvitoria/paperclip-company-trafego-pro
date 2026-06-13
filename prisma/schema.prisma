@@ -30,6 +30,7 @@ model PipelineRun {
   status    String   @default("RUNNING") // RUNNING | DONE | ERROR
   steps     String   @default("[]")
   error     String?
+  auto      Boolean  @default(false)     // execução automática em sequência
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
